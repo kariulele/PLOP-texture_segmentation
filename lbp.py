@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
+import cv2
 import numpy as np
+import matplotlib.pyplot as plt
+import progressbar
 
 
 def make_pow2_circle():
@@ -14,19 +17,45 @@ def make_pow2_circle():
     tmp[0, 2] = 2 ** 7
     return tmp
 
+
 ### This has to be applied on the whole image
 def compute_elm_of_area_3x3(roi):
     tmp = np.array(roi)
     val = tmp[1, 1]
     tmp[tmp < val] = 0
-    tmp[tmp > val] = 1
+    tmp[tmp >= val] = 1
     tmp[1, 1] = 0
     pow2_circ = make_pow2_circle()
     res = pow2_circ * tmp
     return np.add.reduce(res, (0, 1))
 
 
+def apply_lbp_on_image(img):
+    tmp = np.zeros(img.shape)
 
-# tt = np.arange(9).reshape((3, 3))
-# ru = compute_elm_of_area_3x3(tt)
-# print(ru)
+    for i in progressbar.progressbar(range(1, img.shape[0] - 1)):
+        for j in range(1, img.shape[1] - 1):
+            tmp[i, j] = compute_elm_of_area_3x3(img[i - 1:i + 2, j - 1:j + 2])
+    return tmp
+
+
+def openImg(path):
+    iimm = np.array(cv2.imread(path))
+    iimm = cv2.cvtColor(iimm, cv2.COLOR_BGR2RGB)
+    return iimm.astype(np.float32)
+
+
+def plot_img(im):
+    fig, ax = plt.subplots(figsize=(19, 11))
+    im = im.astype(np.uint8)
+    ax.imshow(im, aspect='auto', interpolation='nearest')
+    plt.show()
+
+
+def main():
+    img = openImg("./Dataset/12084.jpg")
+    res = apply_lbp_on_image(img)
+    plot_img(res)
+
+
+main()
