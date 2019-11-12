@@ -3,7 +3,8 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 import progressbar
-
+from skimage import feature
+from skimage.feature import local_binary_pattern
 
 def make_pow2_circle():
     tmp = np.full((3, 3), 0)
@@ -42,6 +43,7 @@ def apply_lbp_on_image(img):
 def openImg(path):
     iimm = np.array(cv2.imread(path))
     iimm = cv2.cvtColor(iimm, cv2.COLOR_BGR2RGB)
+    iimm = cv2.cvtColor(iimm, cv2.COLOR_RGB2GRAY)
     return iimm.astype(np.float32)
 
 
@@ -50,6 +52,10 @@ def plot_img(im):
     im = im.astype(np.uint8)
     ax.imshow(im, aspect='auto', interpolation='nearest')
     plt.show()
+
+
+def comparison_func(img):
+    return feature.local_binary_pattern(img, 8, 1, method="default")
 
 
 def main():
